@@ -1,0 +1,115 @@
+Q1:
+SELECT a.name
+	,a.address
+FROM keeper a
+JOIN vehicle b ON a.id = b.keeper
+WHERE b.id = 'SO 02 PSP';
+
+Q2:
+SELECT COUNT(*)
+FROM camera
+WHERE perim = 'IN'
+
+Q3:
+SELECT *
+FROM IMAGE
+WHERE camera = 10
+	AND DATE_FORMAT(whn, '%Y-%m-%d') < '2007-02-26';
+  
+Q4:
+SELECT COUNT(*) AS number_of_images
+	,camera
+FROM IMAGE
+WHERE camera < 15
+GROUP BY camera
+
+Q5:
+SELECT DISTINCT a.name
+	,a.address
+FROM keeper a
+JOIN vehicle b ON a.id = b.keeper
+JOIN permit c ON c.reg = b.id
+WHERE DATE_FORMAT(c.sDate, '%Y-%m-%d') = '2007-01-30'
+ORDER BY a.name;
+
+Q6:
+SELECT a.name
+	,a.address
+FROM keeper a
+JOIN vehicle b ON a.id = b.keeper
+JOIN IMAGE c ON c.reg = b.id
+WHERE c.camera IN (
+		1
+		,18
+		)
+GROUP BY a.name
+	,a.address
+  
+ Q7:
+ SELECT a.name
+	,a.address
+	,COUNT(b.keeper) AS number_of_cars
+FROM keeper a
+JOIN vehicle b ON a.id = b.keeper
+GROUP BY a.name
+	,a.address
+HAVING COUNT(b.keeper) > 5
+
+Q8:
+SELECT a.reg
+	,COUNT(*) AS current_permits
+FROM (
+	SELECT *
+		,CASE 
+			WHEN permit.chargeType = 'Daily'
+				THEN DATE_ADD(permit.sDate, INTERVAL 1 DAY)
+			WHEN permit.chargeType = 'Weekly'
+				THEN DATE_ADD(permit.sDate, INTERVAL 1 WEEK)
+			WHEN permit.chargeType = 'Monthly'
+				THEN DATE_ADD(permit.sDate, INTERVAL 1 MONTH)
+			WHEN permit.chargeType = 'Annual'
+				THEN DATE_ADD(permit.sDate, INTERVAL 1 YEAR)
+			END AS permit_expiration
+	FROM permit
+	) AS a
+WHERE '2007-02-01' BETWEEN a.sDate
+		AND a.permit_expiration
+GROUP BY a.reg;
+
+Q9:
+SELECT a.whn
+	,a.reg
+	,c.name
+FROM IMAGE a
+JOIN vehicle b ON a.reg = b.id
+JOIN keeper c ON c.id = b.keeper
+WHERE a.camera = 10
+	AND DATE_FORMAT(whn, '%Y-%m-%d') = '2007-02-25'
+  
+Q10:
+SELECT a.id
+	,a.name
+	,a.num_vehicles
+	,b.id
+	,b.num_permits
+FROM (
+	SELECT keeper.id
+		,keeper.name
+		,COUNT(*) AS num_vehicles
+	FROM keeper
+	JOIN vehicle ON keeper.id = vehicle.keeper
+	GROUP BY keeper.id
+		,keeper.name
+	HAVING COUNT(*) > 4
+	) AS a
+JOIN (
+	SELECT vehicle.keeper
+		,vehicle.id
+		,COUNT(*) AS num_permits
+	FROM vehicle
+	JOIN permit ON vehicle.id = permit.reg
+	JOIN keeper ON vehicle.keeper = keeper.id
+	GROUP BY vehicle.id
+		,vehicle.keeper
+	HAVING COUNT(*) > 2
+	) AS b ON a.id = b.keeper;
