@@ -1,0 +1,92 @@
+Q1:
+SELECT FirstName
+	,EmailAddress
+FROM Customer
+WHERE CompanyName = 'Bike World';
+
+Q2:
+SELECT Customer.CompanyName
+FROM Customer
+JOIN CustomerAddress ON Customer.CustomerID = CustomerAddress.CustomerID
+JOIN Address ON CustomerAddress.AddressID = Address.AddressID
+WHERE Address.City = 'Dallas';
+
+Q3:
+SELECT COUNT(*) AS Total
+FROM SalesOrderDetail
+JOIN Product ON SalesOrderDetail.ProductID = Product.ProductID
+WHERE Product.ListPrice > 1000;
+
+Q4:
+SELECT C.CompanyName
+	,S.SubTotal
+	,S.TaxAmt
+	,S.Freight
+FROM Customer C
+JOIN SalesOrderHeader S ON C.CustomerID = S.CustomerID
+WHERE S.SubTotal + S.TaxAmt + S.Freight > 100000;
+
+Q5:
+SELECT SUM(SalesOrderDetail.OrderQty) AS Total
+FROM Product
+JOIN SalesOrderDetail ON Product.ProductID = SalesOrderDetail.ProductID
+JOIN SalesOrderHeader ON SalesOrderHeader.SalesOrderID = SalesOrderDetail.SalesOrderID
+JOIN Customer ON SalesOrderHeader.CustomerID = Customer.CustomerID
+WHERE Customer.CompanyName = 'Riding Cycles'
+	AND Product.Name = 'Racing Socks, L';
+	
+Q6:
+SELECT SalesOrderHeader.CustomerID
+	,SUM(SalesOrderDetail.OrderQty) AS amount_ordered
+FROM SalesOrderDetail
+JOIN SalesOrderHeader ON SalesOrderDetail.SalesOrderID = SalesOrderHeader.SalesOrderID
+GROUP BY SalesOrderHeader.CustomerID
+	,SalesOrderHeader.SalesOrderID
+HAVING SUM(SalesOrderDetail.OrderQty) = 1;
+
+Q7:
+SELECT d.name
+	,companyname
+FROM SalesOrderHeader a
+JOIN Customer b ON a.CustomerID = b.CustomerID
+JOIN SalesOrderDetail c ON a.SalesOrderID = c.SalesOrderID
+JOIN Product d ON c.ProductID = d.ProductID
+JOIN ProductModel e ON d.ProductModelID = e.ProductModelID
+WHERE e.name = 'Racing Socks';
+
+Q8:
+SELECT ProductDescription.Description
+FROM ProductDescription
+JOIN ProductModelProductDescription ON ProductDescription.ProductDescriptionID = ProductModelProductDescription.ProductDescriptionID
+JOIN ProductModel ON ProductModel.ProductModelID = ProductModelProductDescription.ProductModelID
+JOIN Product ON Product.ProductModelID = ProductModel.ProductModelID
+WHERE ProductModelProductDescription.Culture = 'fr'
+	AND Product.ProductID = '736';
+	
+Q9:
+SELECT Customer.CompanyName
+	,SalesOrderHeader.SubTotal
+	,a.total_weight
+FROM SalesOrderHeader
+JOIN Customer ON SalesOrderHeader.CustomerID = Customer.CustomerID
+JOIN (
+	SELECT SalesOrderDetail.SalesOrderID
+		,SUM(COALESCE(Product.Weight, 0) * SalesOrderDetail.OrderQty) AS total_weight
+	FROM Product
+	JOIN SalesOrderDetail ON Product.ProductID = SalesOrderDetail.ProductID
+	GROUP BY SalesOrderID
+	) AS a ON SalesOrderHeader.SalesOrderID = a.SalesOrderID
+ORDER BY SalesOrderHeader.SubTotal DESC;
+
+Q10:
+SELECT SUM(c.OrderQty) AS TotalCranksetProducts
+FROM ProductCategory a
+JOIN Product b
+ON a.ProductCategoryID = b.ProductCategoryID
+JOIN SalesOrderDetail c
+ON b.ProductID = c.ProductID
+JOIN SalesOrderHeader d
+ON d.SalesOrderID = c.SalesOrderID
+JOIN Address e
+ON d.ShipToAddressID = e.AddressID
+WHERE a.Name = 'Cranksets' AND e.City = 'London';
