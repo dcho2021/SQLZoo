@@ -113,3 +113,17 @@ JOIN (
 		,vehicle.keeper
 	HAVING COUNT(*) > 2
 	) AS b ON a.id = b.keeper;
+	
+Q11: **OMIT B/C NOT A QUESTION**
+
+Q12:
+SELECT chargeType
+	,COUNT(*) AS total_amt_issued
+FROM permit
+GROUP BY chargeType
+ORDER BY COUNT(*) DESC
+
+
+
+Q13:
+
